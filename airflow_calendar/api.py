@@ -67,13 +67,9 @@ def get_dag_task_count(session, dagbag, dag):
     loaded_dag = dagbag.get_dag(dag.dag_id)
     return len(loaded_dag.tasks) if loaded_dag else 0
 
-# ===== Rota Principal =====
-
 
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request, session=None):
-
-    # Exclusivo do Airflow 3
     date_col = DagRun.logical_date
     date_attr = 'logical_date'
 
