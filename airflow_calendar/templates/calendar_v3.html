@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Airflow Calendar</title>
-    
+
     <!-- Dependências que o Airflow 2 trazia nativamente, agora importadas para o Airflow 3 -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    
+
     <style>
         body {
             background-color: transparent;
@@ -39,20 +39,20 @@
             display: none !important;
         }
 
-        .modal-header { 
+        .modal-header {
             position: relative;
             padding: 16px 16px 0 45px;
-            border: none; 
+            border: none;
         }
 
         .modal-body { padding: 0 16px 20px; }
         .info-label { color: #70757a; font-size: 0.75rem; text-transform: uppercase; margin-top: 12px; }
         .info-value { color: #3c4043; font-size: 0.95rem; font-weight: 400; }
-        .modal-header .close { 
+        .modal-header .close {
             position: absolute;
             top: 18px;
             left: 16px;
-            margin: 0; 
+            margin: 0;
             z-index: 10;
             padding: 0;
             outline: none;
@@ -84,8 +84,8 @@
         }
 
         #calendar-container {
-            background: white; 
-            padding: 20px; 
+            background: white;
+            padding: 20px;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
@@ -103,6 +103,57 @@
         .dot-running { background-color: #017cee; }
         .dot-queued { background-color: #808080; }
         .dot-other { background-color: #bebebe; }
+
+        body.dark-mode {
+            color: #E2E8F0;
+        }
+
+        body.dark-mode #calendar-container {
+            background-color: #1A202C;
+            box-shadow: none;
+            border: 1px solid #2D3748;
+        }
+
+        body.dark-mode {
+            --fc-page-bg-color: #1A202C;
+            --fc-neutral-bg-color: #2D3748;
+            --fc-neutral-text-color: #E2E8F0;
+            --fc-border-color: #4A5568;
+            --fc-button-text-color: #E2E8F0;
+            --fc-button-bg-color: #2D3748;
+            --fc-button-border-color: #4A5568;
+            --fc-button-hover-bg-color: #4A5568;
+            --fc-button-hover-border-color: #718096;
+            --fc-button-active-bg-color: #4A5568;
+            --fc-button-active-border-color: #718096;
+            --fc-today-bg-color: rgba(255, 255, 255, 0.05);
+        }
+
+        body.dark-mode .fc-col-header-cell-cushion,
+        body.dark-mode .fc-daygrid-day-number {
+            color: #E2E8F0;
+            text-decoration: none;
+        }
+
+        body.dark-mode .modal-content {
+            background-color: #2D3748;
+            border-color: #4A5568;
+            box-shadow: 0 24px 38px 3px rgba(0,0,0,0.6);
+        }
+
+        body.dark-mode .modal-title,
+        body.dark-mode .info-value {
+            color: #F7FAFC;
+        }
+
+        body.dark-mode .info-label {
+            color: #A0AEC0;
+        }
+
+        body.dark-mode .close {
+            color: #E2E8F0;
+            text-shadow: none;
+        }
     </style>
 </head>
 <body>
@@ -143,9 +194,40 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
-    
+
     <script>
+        function syncAirflowTheme() {
+            try {
+                const parentHtml = window.parent.document.documentElement;
+                
+                const isDarkMode = parentHtml.getAttribute('data-theme') === 'dark' || 
+                                   parentHtml.getAttribute('data-color-mode') === 'dark' ||
+                                   parentHtml.classList.contains('dark') ||
+                                   parentHtml.style.colorScheme === 'dark';
+                
+                if (isDarkMode) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } catch (e) {
+                console.warn("Restrição de CORS ou parent iframe inacessível:", e);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            syncAirflowTheme();
+
+            try {
+                const observer = new MutationObserver(syncAirflowTheme);
+                observer.observe(window.parent.document.documentElement, { 
+                    attributes: true, 
+                    attributeFilter: ['data-theme', 'data-color-mode', 'class', 'style'] 
+                });
+            } catch (error) {
+                console.log(error)
+            }
+
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'timeGridWeek',
@@ -162,24 +244,24 @@
                 eventContent: function(arg) {
                     let dag_id = arg.event.extendedProps.dag_id;
                     let task_count = arg.event.extendedProps.task_count || 0;
-                    
+
                     let durationMs = arg.event.end - arg.event.start;
                     let durationMinutes = durationMs / (1000 * 60);
-            
+
                     let container = document.createElement('div');
                     container.style.overflow = 'hidden';
-                    
+
                     let titleEl = document.createElement('b');
                     titleEl.innerText = dag_id;
                     container.appendChild(titleEl);
-            
+
                     if (durationMinutes >= 15) {
                         let subtitleEl = document.createElement('div');
                         subtitleEl.className = 'task-count-badge';
                         subtitleEl.innerHTML = `⚙️ ${task_count} tasks`;
                         container.appendChild(subtitleEl);
                     }
-            
+
                     return { domNodes: [container] };
                 },
 
@@ -246,7 +328,7 @@
                     modalDialog.style.visibility = 'hidden';
                     modalDialog.style.display = 'block';
                     const actualHeight = modalDialog.offsetHeight;
-                    modalDialog.style.display = ''; 
+                    modalDialog.style.display = '';
                     modalDialog.style.visibility = '';
 
                     let x = info.jsEvent.clientX;
