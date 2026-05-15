@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Airflow Calendar</title>
 
-    <!-- Dependências que o Airflow 2 trazia nativamente, agora importadas para o Airflow 3 -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
@@ -16,11 +15,9 @@
             padding-bottom: 350px;
         }
 
-        /* Melhora a legibilidade e evita eventos muito espremidos */
         .fc-v-event { min-height: 25px !important; }
         .fc-event-title { font-weight: bold; font-size: 0.85em; }
 
-        /* Modal Estilo Floating Card (Google Calendar) */
         #eventModal.modal.fade .modal-dialog {
             position: fixed;
             margin: 0;
@@ -105,28 +102,29 @@
         .dot-other { background-color: #bebebe; }
 
         body.dark-mode {
+            background-color: #0F172A;
             color: #E2E8F0;
         }
 
         body.dark-mode #calendar-container {
-            background-color: #1A202C;
+            background-color: #1E293B;
             box-shadow: none;
-            border: 1px solid #2D3748;
+            border: 1px solid #334155;
         }
 
         body.dark-mode {
-            --fc-page-bg-color: #1A202C;
-            --fc-neutral-bg-color: #2D3748;
+            --fc-page-bg-color: #1E293B;
+            --fc-neutral-bg-color: #334155;
             --fc-neutral-text-color: #E2E8F0;
-            --fc-border-color: #4A5568;
+            --fc-border-color: #475569;
             --fc-button-text-color: #E2E8F0;
-            --fc-button-bg-color: #2D3748;
-            --fc-button-border-color: #4A5568;
-            --fc-button-hover-bg-color: #4A5568;
-            --fc-button-hover-border-color: #718096;
-            --fc-button-active-bg-color: #4A5568;
-            --fc-button-active-border-color: #718096;
-            --fc-today-bg-color: rgba(255, 255, 255, 0.05);
+            --fc-button-bg-color: #334155;
+            --fc-button-border-color: #475569;
+            --fc-button-hover-bg-color: #475569;
+            --fc-button-hover-border-color: #64748B;
+            --fc-button-active-bg-color: #475569;
+            --fc-button-active-border-color: #64748B;
+            --fc-today-bg-color: rgba(255, 193, 7, 0.15);
         }
 
         body.dark-mode .fc-col-header-cell-cushion,
