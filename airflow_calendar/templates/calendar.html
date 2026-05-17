@@ -1,11 +1,9 @@
 {% extends "airflow/main.html" %}
 {% block content %}
   <style>
-    /* Melhora a legibilidade e evita eventos muito espremidos */
     .fc-v-event { min-height: 25px !important; }
     .fc-event-title { font-weight: bold; font-size: 0.85em; }
 
-    /* Modal Estilo Floating Card (Google Calendar) */
     #eventModal.modal.fade .modal-dialog {
         position: fixed;
         margin: 0;
@@ -24,7 +22,6 @@
         display: none !important;
     }
 
-    /* Estilos internos minimalistas */
     .modal-header { padding: 12px 16px 0; border: none; }
     .modal-body { padding: 0 16px 20px; }
     .info-label { color: #70757a; font-size: 0.75rem; text-transform: uppercase; margin-top: 12px; }
