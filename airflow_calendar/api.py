@@ -150,7 +150,7 @@ def index(request: Request, session=None):
             if schedule and isinstance(schedule, str) and croniter.is_valid(schedule):
                 try:
                     cron = croniter(schedule, cron_start)
-                    for _ in range(5000):
+                    for _ in range(10000):
                         event_time = cron.get_next(datetime)
                         if event_time > cron_end:
                             break
