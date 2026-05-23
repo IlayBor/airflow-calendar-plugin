@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 from flask_appbuilder import BaseView, expose
 from airflow import __version__ as airflow_version
-from sqlalchemy import and_, desc
+from sqlalchemy import desc
 from airflow.models import DagModel, DagRun
 from airflow.models.dagbag import DagBag
 from airflow.models.serialized_dag import SerializedDagModel
@@ -17,7 +17,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 IS_AIRFLOW_3 = airflow_version.startswith('3')
 IGNORED_DAGS = ["airflow_monitoring"]
-RUNS_COUNT = 10000
+RUNS_COUNT = 5000
 
 
 class CalendarView(BaseView):
@@ -99,8 +99,6 @@ class CalendarView(BaseView):
                     "date": exec_date.strftime('%d/%m/%Y %H:%M')
                 })
 
-            schedule_delta = self._parse_timedelta_schedule(schedule)
-
             if schedule and isinstance(schedule, str) and croniter.is_valid(schedule):
                 try:
                     cron = croniter(schedule, cron_start)
@@ -135,51 +133,53 @@ class CalendarView(BaseView):
                         })
                 except Exception:
                     continue
-            elif schedule_delta and recent_runs:
-                try:
-                    now_naive = datetime.utcnow()
-                    # Skip pre-created future runs (Airflow 3 schedules the next run
-                    # before it executes); anchor only to the last actual past run
-                    past_runs = [
-                        r for r in recent_runs
-                        if getattr(r, date_attr).replace(tzinfo=None) <= now_naive
-                    ]
-                    if not past_runs:
-                        continue
-                    base = getattr(past_runs[0], date_attr).replace(
-                        tzinfo=None)
-                    # Walk back to the first occurrence at or after cron_start
-                    t = base
-                    while t >= cron_start:
-                        t -= schedule_delta
-                    t += schedule_delta
-                    count = 0
-                    while t <= cron_end and count < RUNS_COUNT:
-                        current_iso_normalized = t.replace(
-                            microsecond=0).isoformat()
-                        status = run_history.get(
-                            current_iso_normalized, "no_run")
-                        border_color = self.get_border_color(status)
-                        events.append({
-                            "title": dag.dag_id,
-                            "start": t.isoformat() + 'Z',
-                            "end": (t + timedelta(seconds=avg_seconds)).isoformat() + 'Z',
-                            "backgroundColor": bg_color,
-                            "borderColor": border_color,
-                            "borderWidth": "3px",
-                            "extendedProps": {
-                                "status": status,
-                                "cron": str(schedule),
-                                "duration": f"{int(avg_seconds/60)}m {int(avg_seconds % 60)}s",
-                                "dag_id": dag.dag_id,
-                                "task_count": int(task_count),
-                                "history": history_data
-                            }
-                        })
+            else:
+                schedule_delta = self._parse_timedelta_schedule(schedule)
+                if schedule_delta and recent_runs:
+                    try:
+                        now_naive = datetime.utcnow()
+                        # Skip pre-created future runs (Airflow 3 schedules the next run
+                        # before it executes); anchor only to the last actual past run
+                        past_runs = [
+                            r for r in recent_runs
+                            if getattr(r, date_attr).replace(tzinfo=None) <= now_naive
+                        ]
+                        if not past_runs:
+                            continue
+                        base = getattr(past_runs[0], date_attr).replace(
+                            tzinfo=None)
+                        # Walk back to the first occurrence at or after cron_start
+                        t = base
+                        while t >= cron_start:
+                            t -= schedule_delta
                         t += schedule_delta
-                        count += 1
-                except Exception:
-                    continue
+                        count = 0
+                        while t <= cron_end and count < RUNS_COUNT:
+                            current_iso_normalized = t.replace(
+                                microsecond=0).isoformat()
+                            status = run_history.get(
+                                current_iso_normalized, "no_run")
+                            border_color = self.get_border_color(status)
+                            events.append({
+                                "title": dag.dag_id,
+                                "start": t.isoformat() + 'Z',
+                                "end": (t + timedelta(seconds=avg_seconds)).isoformat() + 'Z',
+                                "backgroundColor": bg_color,
+                                "borderColor": border_color,
+                                "borderWidth": "3px",
+                                "extendedProps": {
+                                    "status": status,
+                                    "cron": str(schedule),
+                                    "duration": f"{int(avg_seconds/60)}m {int(avg_seconds % 60)}s",
+                                    "dag_id": dag.dag_id,
+                                    "task_count": int(task_count),
+                                    "history": history_data
+                                }
+                            })
+                            t += schedule_delta
+                            count += 1
+                    except Exception:
+                        continue
 
         return self.render_template("calendar.html", events=events)
 

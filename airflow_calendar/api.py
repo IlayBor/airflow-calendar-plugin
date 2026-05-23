@@ -18,6 +18,7 @@ from airflow.utils import timezone
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 IGNORED_DAGS = ["airflow_monitoring"]
+RUNS_COUNT = 5000
 
 app = FastAPI(title="Airflow Calendar")
 templates = Jinja2Templates(directory=os.path.join(CURRENT_DIR, 'templates'))
@@ -169,7 +170,7 @@ def index(request: Request, session=None):
             if schedule and isinstance(schedule, str) and croniter.is_valid(schedule):
                 try:
                     cron = croniter(schedule, cron_start)
-                    for _ in range(10000):
+                    for _ in range(RUNS_COUNT):
                         event_time = cron.get_next(datetime)
                         if event_time > cron_end:
                             break
@@ -219,7 +220,7 @@ def index(request: Request, session=None):
                             t -= schedule_delta
                         t += schedule_delta
                         count = 0
-                        while t <= cron_end and count < 5000:
+                        while t <= cron_end and count < RUNS_COUNT:
                             current_iso_normalized = t.replace(
                                 microsecond=0).isoformat()
                             status = run_history.get(
