@@ -70,7 +70,8 @@ def _parse_timedelta_schedule(schedule):
     # Match 'X days, HH:MM:SS' or 'X day, HH:MM:SS'
     m = re.match(r'^(\d+)\s+days?,\s*(\d+):(\d+):(\d+)$', schedule.strip())
     if m:
-        days, h, mn, s = int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4))
+        days, h, mn, s = int(m.group(1)), int(
+            m.group(2)), int(m.group(3)), int(m.group(4))
         return timedelta(days=days, hours=h, minutes=mn, seconds=s)
     # Match 'HH:MM:SS' (no days part)
     m = re.match(r'^(\d+):(\d+):(\d+)$', schedule.strip())
@@ -155,7 +156,8 @@ def index(request: Request, session=None):
                         if event_time > cron_end:
                             break
 
-                        current_iso_normalized = event_time.replace(microsecond=0).isoformat()
+                        current_iso_normalized = event_time.replace(
+                            microsecond=0).isoformat()
                         status = run_history.get(
                             current_iso_normalized, "no_run")
                         border_color = get_border_color(status)
@@ -191,7 +193,8 @@ def index(request: Request, session=None):
                         ]
                         if not past_runs:
                             continue
-                        base = getattr(past_runs[0], date_attr).replace(tzinfo=None)
+                        base = getattr(past_runs[0], date_attr).replace(
+                            tzinfo=None)
                         # Walk back to the first occurrence at or after cron_start
                         t = base
                         while t >= cron_start:
@@ -199,8 +202,10 @@ def index(request: Request, session=None):
                         t += schedule_delta
                         count = 0
                         while t <= cron_end and count < 5000:
-                            current_iso_normalized = t.replace(microsecond=0).isoformat()
-                            status = run_history.get(current_iso_normalized, "no_run")
+                            current_iso_normalized = t.replace(
+                                microsecond=0).isoformat()
+                            status = run_history.get(
+                                current_iso_normalized, "no_run")
                             border_color = get_border_color(status)
                             events.append({
                                 "title": dag.dag_id,
