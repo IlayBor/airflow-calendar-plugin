@@ -61,25 +61,42 @@ def get_schedule_info(dag):
 
 
 def _parse_timedelta_schedule(schedule):
-    """Return a timedelta if schedule is a timedelta object or a timedelta string
-    like '1 day, 6:00:00' or '30:00:00'. Returns None otherwise."""
+    """
+    Return a timedelta if schedule is a timedelta object or a timedelta string
+    like '1 day, 6:00:00' or '30:00:00'. Returns None otherwise.
+    """
+
     if isinstance(schedule, timedelta):
         return schedule
+
     if not isinstance(schedule, str):
         return None
-    # Match 'X days, HH:MM:SS' or 'X day, HH:MM:SS'
-    m = re.match(r'^(\d+)\s+days?,\s*(\d+):(\d+):(\d+)$', schedule.strip())
-    if m:
-        days, h, mn, s = int(m.group(1)), int(
-            m.group(2)), int(m.group(3)), int(m.group(4))
-        return timedelta(days=days, hours=h, minutes=mn, seconds=s)
-    # Match 'HH:MM:SS' (no days part)
-    m = re.match(r'^(\d+):(\d+):(\d+)$', schedule.strip())
-    if m:
-        h, mn, s = int(m.group(1)), int(m.group(2)), int(m.group(3))
-        td = timedelta(hours=h, minutes=mn, seconds=s)
-        if td.total_seconds() > 0:
-            return td
+
+    cleaned_schedule = schedule.strip()
+
+    # Case 1: Match 'X days, HH:MM:SS' or 'X day, HH:MM:SS'
+    match_with_days = re.match(
+        r'^(\d+)\s+days?,\s*(\d+):(\d+):(\d+)$', cleaned_schedule)
+    if match_with_days:
+        days = int(match_with_days.group(1))
+        hours = int(match_with_days.group(2))
+        minutes = int(match_with_days.group(3))
+        seconds = int(match_with_days.group(4))
+
+        return timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
+
+    # Case 2: Match 'HH:MM:SS' (just time, no days part)
+    match_time_only = re.match(r'^(\d+):(\d+):(\d+)$', cleaned_schedule)
+    if match_time_only:
+        hours = int(match_time_only.group(1))
+        minutes = int(match_time_only.group(2))
+        seconds = int(match_time_only.group(3))
+
+        parsed_timedelta = timedelta(
+            hours=hours, minutes=minutes, seconds=seconds)
+        if parsed_timedelta.total_seconds() > 0:
+            return parsed_timedelta
+
     return None
 
 
