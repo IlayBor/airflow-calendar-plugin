@@ -43,12 +43,13 @@ def get_border_color(status):
 
 
 def get_avg_execution_time(recent_success_runs):
+    default_avg_seconds = 300
     if recent_success_runs:
         durations = [(run.end_date - run.start_date).total_seconds()
                      for run in recent_success_runs if run.start_date]
         if durations:
-            return sum(durations) / len(durations)
-    return 300
+            return max((sum(durations) / len(durations)), default_avg_seconds)
+    return default_avg_seconds
 
 
 def get_schedule_info(dag):

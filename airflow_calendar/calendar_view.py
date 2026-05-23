@@ -195,15 +195,14 @@ class CalendarView(BaseView):
         return border_color
 
     def get_avg_execution_time(self, recent_success_runs):
-        avg_seconds = 300
+        default_avg_seconds = 300
         if recent_success_runs:
             durations = [(run.end_date - run.start_date).total_seconds()
                          for run in recent_success_runs if run.start_date]
             if durations:
-                avg_seconds = sum(durations) / len(durations)
+                return max((sum(durations) / len(durations)), default_avg_seconds)
 
-        avg_seconds = max(avg_seconds, 300)
-        return avg_seconds
+        return default_avg_seconds
 
     def get_schedule_info(self, dag):
         schedule = getattr(dag, 'schedule_interval', None)
