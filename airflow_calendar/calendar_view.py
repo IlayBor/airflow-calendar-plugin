@@ -137,7 +137,8 @@ class CalendarView(BaseView):
                 schedule_delta = self._parse_timedelta_schedule(schedule)
                 if schedule_delta and recent_runs:
                     try:
-                        now_naive = datetime.now(dt_timezone.utc).replace(tzinfo=None)
+                        now_naive = datetime.now(
+                            dt_timezone.utc).replace(tzinfo=None)
                         # Skip pre-created future runs (Airflow 3 schedules the next run
                         # before it executes); anchor only to the last actual past run
                         anchor_run = next(
