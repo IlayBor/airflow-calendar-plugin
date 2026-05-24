@@ -2,7 +2,7 @@ import os
 import re
 import hashlib
 from croniter import croniter
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone as dt_timezone
 
 from flask_appbuilder import BaseView, expose
 from airflow import __version__ as airflow_version
@@ -137,33 +137,39 @@ class CalendarView(BaseView):
                 schedule_delta = self._parse_timedelta_schedule(schedule)
                 if schedule_delta and recent_runs:
                     try:
-                        now_naive = datetime.utcnow()
+                        now_naive = datetime.now(dt_timezone.utc).replace(tzinfo=None)
                         # Skip pre-created future runs (Airflow 3 schedules the next run
                         # before it executes); anchor only to the last actual past run
-                        past_runs = [
-                            r for r in recent_runs
-                            if getattr(r, date_attr).replace(tzinfo=None) <= now_naive
-                        ]
-                        if not past_runs:
+                        anchor_run = next(
+                            (run for run in recent_runs if getattr(
+                                run, date_attr).replace(tzinfo=None) <= now_naive),
+                            None
+                        )
+
+                        if not anchor_run:
                             continue
-                        base = getattr(past_runs[0], date_attr).replace(
-                            tzinfo=None)
-                        # Walk back to the first occurrence at or after cron_start
-                        t = base
-                        while t >= cron_start:
-                            t -= schedule_delta
-                        t += schedule_delta
-                        count = 0
-                        while t <= cron_end and count < RUNS_COUNT:
-                            current_iso_normalized = t.replace(
+
+                        anchor_time = getattr(
+                            anchor_run, date_attr).replace(tzinfo=None)
+
+                        current_event_time = anchor_time
+                        while current_event_time >= cron_start:
+                            current_event_time -= schedule_delta
+
+                        current_event_time += schedule_delta
+
+                        rendered_count = 0
+                        while current_event_time <= cron_end and rendered_count < RUNS_COUNT:
+                            current_iso_normalized = current_event_time.replace(
                                 microsecond=0).isoformat()
                             status = run_history.get(
                                 current_iso_normalized, "no_run")
                             border_color = self.get_border_color(status)
+
                             events.append({
                                 "title": dag.dag_id,
-                                "start": t.isoformat() + 'Z',
-                                "end": (t + timedelta(seconds=avg_seconds)).isoformat() + 'Z',
+                                "start": current_event_time.isoformat() + 'Z',
+                                "end": (current_event_time + timedelta(seconds=avg_seconds)).isoformat() + 'Z',
                                 "backgroundColor": bg_color,
                                 "borderColor": border_color,
                                 "borderWidth": "3px",
@@ -176,8 +182,9 @@ class CalendarView(BaseView):
                                     "history": history_data
                                 }
                             })
-                            t += schedule_delta
-                            count += 1
+                            current_event_time += schedule_delta
+                            rendered_count += 1
+
                     except Exception:
                         continue
 
