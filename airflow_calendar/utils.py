@@ -142,19 +142,33 @@ def _add_cron_events(events, dag, schedule, cron_start, cron_end, run_history,
         ))
 
 
+def _timedelta_anchor_time(dag, recent_runs, date_attr):
+    """Pick a reference instant to project timedelta slots (like cron uses cron_start)."""
+    now_naive = datetime.now(dt_timezone.utc).replace(tzinfo=None)
+
+    for run in recent_runs:
+        run_time = getattr(run, date_attr).replace(tzinfo=None)
+        if run_time <= now_naive:
+            return run_time
+
+    if recent_runs:
+        # Airflow 2 may only have the next scheduled run before the first execution.
+        return getattr(recent_runs[-1], date_attr).replace(tzinfo=None)
+
+    next_dagrun = getattr(dag, 'next_dagrun', None)
+    if next_dagrun is not None:
+        return next_dagrun.replace(tzinfo=None)
+
+    return None
+
+
 def _add_timedelta_events(events, dag, schedule, schedule_delta, recent_runs,
                           date_attr, cron_start, cron_end, run_history,
                           avg_seconds, bg_color, task_count, history_data):
-    now_naive = datetime.now(dt_timezone.utc).replace(tzinfo=None)
-    anchor_run = next(
-        (run for run in recent_runs
-         if getattr(run, date_attr).replace(tzinfo=None) <= now_naive),
-        None,
-    )
-    if not anchor_run:
-        return
 
-    anchor_time = getattr(anchor_run, date_attr).replace(tzinfo=None)
+    anchor_time = _timedelta_anchor_time(dag, recent_runs, date_attr)
+    if anchor_time is None:
+        return
     current_event_time = anchor_time
     while current_event_time >= cron_start:
         current_event_time -= schedule_delta
@@ -222,7 +236,7 @@ def build_calendar_events(session, dags, dagbag, date_col, date_attr):
                 continue
         else:
             schedule_delta = parse_timedelta_schedule(schedule)
-            if schedule_delta and recent_runs:
+            if schedule_delta:
                 try:
                     _add_timedelta_events(
                         events, dag, schedule, schedule_delta, recent_runs,
