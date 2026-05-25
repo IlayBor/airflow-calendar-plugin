@@ -1,10 +1,21 @@
 (function (global) {
-    const DEFAULT_COLOR = '#3788d8';
+    const DEFAULT_COLOR = '#039BE5';
+    const LEGACY_DEFAULT_COLOR = '#3788d8';
 
     const PALETTE = [
         '#D50000', '#E67C73', '#F4511E', '#F6BF26', '#33B679', '#0B8043',
         '#039BE5', '#3F51B5', '#7986CB', '#8E24AA', '#616161',
     ];
+
+    function resolveDagColor(storedColor, eventColor) {
+        if (storedColor && storedColor !== LEGACY_DEFAULT_COLOR && PALETTE.indexOf(storedColor) >= 0) {
+            return storedColor;
+        }
+        if (eventColor && eventColor !== LEGACY_DEFAULT_COLOR && PALETTE.indexOf(eventColor) >= 0) {
+            return eventColor;
+        }
+        return DEFAULT_COLOR;
+    }
 
     function applyColorToDag(calendar, dagId, color) {
         const apply = function () {
@@ -36,6 +47,7 @@
             button.setAttribute('aria-label', 'Color ' + color);
             if (color === selectedColor) {
                 button.classList.add('selected');
+                button.setAttribute('aria-selected', 'true');
             }
             button.addEventListener('click', function (event) {
                 event.stopPropagation();
@@ -50,8 +62,6 @@
         let dagColors = {};
         let activeDagId = null;
 
-        // Colors are already applied server-side when events are built.
-        // Only load the map here for the picker UI (avoid setProp on every event).
         fetch(apiBase)
             .then(function (response) {
                 if (!response.ok) {
@@ -95,12 +105,12 @@
         }
 
         return {
-            openForDag: function (dagId) {
+            openForDag: function (dagId, eventColor) {
                 activeDagId = dagId;
                 if (!pickerEl) {
                     return;
                 }
-                const current = dagColors[dagId] || DEFAULT_COLOR;
+                const current = resolveDagColor(dagColors[dagId], eventColor);
                 renderPicker(pickerEl, current, selectColor);
             },
         };

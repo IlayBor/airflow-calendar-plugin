@@ -413,7 +413,7 @@
                         finalY = viewHeight - actualHeight - buffer;
                     }
 
-                    colorPicker.openForDag(dagId);
+                    colorPicker.openForDag(dagId, info.event.backgroundColor);
 
                     modalDialog.style.left = finalX + "px";
                     modalDialog.style.top = finalY + "px";

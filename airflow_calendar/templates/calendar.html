@@ -1,5 +1,6 @@
 {% extends "airflow/main.html" %}
 {% block content %}
+  <link rel="stylesheet" href="{{ static_base }}/calendar_colors.css">
   <style>
     .fc-v-event { min-height: 25px !important; }
     .fc-event-title { font-weight: bold; font-size: 0.85em; }
@@ -131,8 +132,6 @@
         margin: 0 10px;
         opacity: 0.4;
     }
-
-    <link rel="stylesheet" href="{{ static_base }}/calendar_colors.css">
 
 </style>
 
@@ -327,7 +326,7 @@
             finalY = viewHeight - actualHeight - buffer;
           }
 
-          colorPicker.openForDag(dagId);
+          colorPicker.openForDag(dagId, info.event.backgroundColor);
 
           modalDialog.style.left = finalX + "px";
           modalDialog.style.top = finalY + "px";

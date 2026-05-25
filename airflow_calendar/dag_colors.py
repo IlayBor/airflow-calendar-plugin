@@ -5,7 +5,9 @@ import re
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 COLORS_FILE = os.path.join(CURRENT_DIR, 'data', 'dag_colors.json')
 
-DEFAULT_BG_COLOR = '#3788d8'
+# Google Calendar default event color (Peacock)
+DEFAULT_BG_COLOR = '#039BE5'
+LEGACY_DEFAULT_BG_COLOR = '#3788d8'
 
 COLOR_PALETTE = (
     '#D50000', '#E67C73', '#F4511E', '#F6BF26', '#33B679', '#0B8043',
@@ -49,4 +51,7 @@ def save_dag_color(dag_id, color):
 def get_dag_color(dag_id, colors=None):
     if colors is None:
         colors = load_dag_colors()
-    return colors.get(dag_id, DEFAULT_BG_COLOR)
+    color = colors.get(dag_id, DEFAULT_BG_COLOR)
+    if color == LEGACY_DEFAULT_BG_COLOR:
+        return DEFAULT_BG_COLOR
+    return color
