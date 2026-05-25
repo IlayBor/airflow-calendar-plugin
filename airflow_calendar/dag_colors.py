@@ -38,6 +38,9 @@ def load_dag_colors():
 def save_dag_color(dag_id, color):
     if not dag_id or not isinstance(dag_id, str):
         raise ValueError('Invalid dag_id')
+    if not isinstance(color, str):
+        raise ValueError('Invalid color')
+    color = color.strip().upper()
     if not _HEX_COLOR_RE.match(color) or color not in COLOR_PALETTE:
         raise ValueError('Invalid color')
     os.makedirs(os.path.dirname(COLORS_FILE), exist_ok=True)
