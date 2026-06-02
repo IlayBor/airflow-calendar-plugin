@@ -46,29 +46,25 @@
         modalDialog.style.top = pos.y + 'px';
     }
 
-    function clearModalArtifacts() {
-        if (!global.jQuery) {
-            return;
-        }
-        global.jQuery('.modal-backdrop').remove();
-        global.jQuery('body').removeClass('modal-open');
-        document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
-        document.documentElement.style.overflow = '';
-        document.documentElement.style.paddingRight = '';
-    }
-
-    function preventBootstrapScrollLock() {
+    function patchScrollbarBehavior() {
         if (!global.jQuery || !global.jQuery.fn.modal) {
             return;
         }
         const Modal = global.jQuery.fn.modal.Constructor;
-        if (!Modal || Modal.__airflowCalendarScrollLockPatched) {
+        if (!Modal || Modal.__airflowCalendarPatched) {
             return;
         }
-        Modal.prototype._setScrollbar = function () {};
-        Modal.prototype._resetScrollbar = function () {};
-        Modal.__airflowCalendarScrollLockPatched = true;
+
+        Modal.prototype._setScrollbar = function () {
+            this._airflowBodyOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+        };
+
+        Modal.prototype._resetScrollbar = function () {
+            document.body.style.overflow = this._airflowBodyOverflow || '';
+        };
+
+        Modal.__airflowCalendarPatched = true;
     }
 
     function initEventModal() {
@@ -76,12 +72,23 @@
             return;
         }
 
-        preventBootstrapScrollLock();
+        patchScrollbarBehavior();
 
         const $modal = global.jQuery('#eventModal');
-        $modal.modal({ backdrop: false, keyboard: true, show: false });
+        $modal.modal({ backdrop: true, keyboard: true, show: false });
 
-        $modal.on('show.bs.modal shown.bs.modal hidden.bs.modal', clearModalArtifacts);
+        $modal.on('click.airflowCalendarDismiss', function (event) {
+            if (event.target === event.currentTarget) {
+                $modal.modal('hide');
+            }
+        });
+
+        $modal.on('hidden.bs.modal', function () {
+            global.jQuery('.modal-backdrop').remove();
+            global.jQuery('body').removeClass('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        });
     }
 
     function showEventModal(modalDialog, clientX, clientY) {
@@ -92,7 +99,7 @@
             return;
         }
 
-        clearModalArtifacts();
+        global.jQuery('.modal-backdrop').remove();
         $modal.modal('show');
     }
 

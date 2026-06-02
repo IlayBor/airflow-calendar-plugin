@@ -2,6 +2,11 @@ html {
     scrollbar-gutter: stable;
 }
 
+/* Transparent overlay: captures outside clicks without dimming the calendar. */
+.modal-backdrop.show {
+    opacity: 0 !important;
+}
+
 #eventModal.modal-measuring {
     display: block !important;
     visibility: hidden;
@@ -11,4 +16,8 @@ html {
 #eventModal.modal-measuring .modal-dialog {
     position: fixed;
     margin: 0;
+}
+
+#eventModal.show {
+    display: block;
 }
