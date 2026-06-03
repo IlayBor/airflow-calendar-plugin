@@ -1,5 +1,5 @@
 (function (global) {
-    const MODAL_WIDTH = 320;
+    const MODAL_WIDTH = 300;
     const BUFFER = 15;
 
     function measureModalHeight() {
