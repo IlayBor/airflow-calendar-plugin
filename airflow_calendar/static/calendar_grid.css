@@ -35,10 +35,10 @@
 }
 
 body.dark-mode .fc .fc-day-today {
-    background-color: rgba(255, 193, 7, 0.15) !important;
+    background-color: rgba(255, 193, 7, 0.10) !important;
 }
 
 body.dark-mode .fc .fc-day-today .fc-timegrid-col-frame,
 body.dark-mode .fc .fc-day-today .fc-daygrid-day-frame {
-    background-color: rgba(255, 193, 7, 0.15) !important;
+    background-color: rgba(255, 193, 7, 0.10) !important;
 }
