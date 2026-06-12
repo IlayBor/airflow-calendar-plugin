@@ -142,17 +142,38 @@ html {
     flex-shrink: 0;
 }
 
-#eventModal .dag-modal-cron {
-    font-size: 0.8125rem;
+#eventModal .dag-schedule-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+}
+
+#eventModal .dag-schedule-row .dag-modal-label {
+    flex: 0 0 auto;
+    margin-bottom: 0;
+    margin-right: auto;
+}
+
+#eventModal .dag-schedule-row .dag-modal-cron {
+    display: inline-block;
+    flex: 0 1 auto;
+    width: fit-content;
+    max-width: 100%;
+    margin-left: auto;
+    font-size: 0.75rem;
     font-weight: 500;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     color: #1a73e8;
     background: #e8f0fe;
-    border-radius: 4px;
-    padding: 2px 6px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 160px;
+    border-radius: 6px;
+    padding: 5px 8px;
+    line-height: 1.4;
+    text-align: left;
+    white-space: normal;
+    word-break: break-word;
+    overflow: visible;
+    box-sizing: border-box;
 }
 
 #eventModal .dag-history-row {
