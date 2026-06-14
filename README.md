@@ -16,13 +16,11 @@ A modern and intuitive calendar interface for visualizing your DAG schedules in 
 
 # 🎯 Why Airflow Calendar?
 
-Have you ever felt lost trying to keep track of your Airflow DAG schedules?
+Imagine the following scenario: You have to deploy some new critical pipelines in production, but your Airflow environment is already loaded with a dozen of DAGs.
 
-When managing complex environments with dozens of DAGs, each with different execution requirements, losing control of your schedule is common.
+> Then, the following question arises: will your new DAG scheduled at ```*/45 2-6 * * 1-5``` collide with that heavy Spark job running every 40 minutes?
 
-While Airflow provides features to visualize the execution history of individual DAGs, it lacks a "global" view to see all scheduled DAGs at once.
-
-This is where Airflow Calendar comes in. It provides a visual timeline of all your DAG schedules, allowing you to see at a glance when each DAG is set to run, identify potential overlaps, avoid resource conflicts, and manage concurrency and dependencies effectively.
+This is where Airflow Calendar comes in. It provides a visual timeline of all your DAG schedules, allowing you to see at a glance when each DAG is set to run, identify potential overlaps, and avoid resource conflicts, **making workflow orchestration human-readable**.
 
 You can check more details about the project in the [Medium article](https://medium.com/data-engineer-things/airflow-calendar-improving-dag-management-with-a-visual-schedule-cd330df1d644).
 
