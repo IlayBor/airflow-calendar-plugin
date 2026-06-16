@@ -22,7 +22,7 @@ Imagine the following scenario: You have to deploy some new critical pipelines i
 
 This is where Airflow Calendar comes in. It provides a visual timeline of all your DAG schedules, allowing you to see at a glance when each DAG is set to run, identify potential overlaps, and avoid resource conflicts, **making workflow orchestration human-readable**.
 
-You can check more details about the project in the [Medium article](https://medium.com/data-engineer-things/airflow-calendar-improving-dag-management-with-a-visual-schedule-cd330df1d644).
+You can check more details about the project in the [Medium article](https://medium.com/data-engineer-things/stop-staring-at-cron-expressions-airflow-just-got-a-google-calendar-upgrade-f519c709e3c1).
 
 # ✨ Key Features
 Manage complex production environments is easier with Airflow Calendar. Here are some of the key features.
